@@ -14,15 +14,12 @@ import utils
 class LinearModel(object):
     def __init__(self, n_classes, n_features, **kwargs):
         self.W = np.zeros((n_classes, n_features))
-        print("Wshape",self.W.shape)
 
     def update_weight(self, x_i, y_i, **kwargs):
         raise NotImplementedError
 
     def train_epoch(self, X, y, **kwargs):
-        print(X.shape,y.shape)
         for x_i, y_i in zip(X, y):
-            
             self.update_weight(x_i, y_i, **kwargs)
 
     def predict(self, X):
@@ -49,7 +46,7 @@ def sign(x):
         return -1
     
 
-class Perceptron(LinearModel):
+class PerceptronM(LinearModel):
     def update_weight(self, x_i, y_i, **kwargs):
         """
         x_i (n_features): a single training example
@@ -62,15 +59,24 @@ class Perceptron(LinearModel):
             self.W[y_hat]-=x_i
 
 
-class LogisticRegression(LinearModel):
+class LogisticRegressionM(LinearModel):
     def update_weight(self, x_i, y_i, learning_rate=0.001):
+        scores=np.expand_dims(np.dot(self.W,x_i),axis=1) #4,1
+        scores=np.apply_along_axis(np.exp,axis=1,arr=scores) 
+        scores=scores/np.sum(scores,axis=0) #axis 0 é por coluna
+        e_y=np.zeros((self.W.shape[0],1))
+        e_y[y_i]=1
+        scores=scores-e_y
+        gradient=np.dot(scores,np.expand_dims(x_i,axis=1).T)
+        self.W-=learning_rate*gradient
+
+        
         """
         x_i (n_features): a single training example
         y_i: the gold label for that example
         learning_rate (float): keep it at the default value for your plots
         """
         # Q1.1b
-        raise NotImplementedError
 
 
 class MLP(object):
@@ -111,7 +117,7 @@ def plot(epochs, train_accs, val_accs,opt):
     plt.plot(epochs, train_accs, label='train')
     plt.plot(epochs, val_accs, label='validation')
     plt.legend()
-    plt.savefig(f"images/q1/{opt.model}2.png")
+    plt.savefig(f"images/q1/{opt.model}_lr_{opt.learning_rate}.png")
     plt.show()
     
 
@@ -121,6 +127,8 @@ def plot_loss(epochs, loss):
     plt.plot(epochs, loss, label='train')
     plt.legend()
     plt.show()
+
+from sklearn.linear_model import LogisticRegression,Perceptron
 
 
 def main():
@@ -151,15 +159,22 @@ def main():
 
     # initialize the model
     if opt.model == 'perceptron':
-        model = Perceptron(n_classes, n_feats)
+        model = PerceptronM(n_classes, n_feats)
     elif opt.model == 'logistic_regression':
-        model = LogisticRegression(n_classes, n_feats)
+        model = LogisticRegressionM(n_classes, n_feats,)
     else:
         model = MLP(n_classes, n_feats, opt.hidden_size)
     epochs = np.arange(1, opt.epochs + 1)
     train_loss = []
     valid_accs = []
     train_accs = []
+    # clf = LogisticRegression(fit_intercept=False, penalty=None,solver='newton-cholesky')
+    # clf = Perceptron(random_state=42,max_iter=20)
+    # clf.fit(train_X, train_y)
+    # print("LR train",clf.score(train_X, train_y))
+    # print("LR dev",clf.score(dev_X, dev_y))
+    # print("LR test",clf.score(test_X, test_y))
+    
     
     for i in epochs:
         print('Training epoch {}'.format(i))
@@ -194,7 +209,6 @@ def main():
         model.evaluate(test_X, test_y)
         ))
 
-    # plot
     plot(epochs, train_accs, valid_accs,opt)
     if opt.model == 'mlp':
         plot_loss(epochs, train_loss)

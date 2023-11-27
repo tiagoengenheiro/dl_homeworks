@@ -1,0 +1,9 @@
+Results for Perceptron sklearn:
+Percp train 0.4982919047570196
+Percp dev 0.5001846381093058
+Percp test 0.3440453686200378
+
+Results for LogR sklearn:
+LogR train 0.6580116335135467
+LogR dev 0.6598042836041359
+LogR test 0.5860113421550095
