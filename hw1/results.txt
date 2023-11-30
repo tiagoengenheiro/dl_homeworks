@@ -7,3 +7,6 @@ Results for LogR sklearn:
 LogR train 0.6580116335135467
 LogR dev 0.6598042836041359
 LogR test 0.5860113421550095
+
+Results for MLP:
+Final test acc: 0.7599

@@ -1,3 +1,5 @@
 *.npz
 *.pdf
 *ex.py
+*.pickle
+*.ipynb
