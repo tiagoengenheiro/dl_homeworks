@@ -126,7 +126,7 @@ class MLP(object):
         n_possible = y.shape[0]
         return n_correct / n_possible
 
-    def forward(self, x_i):
+    def forward(self, x_i): 
         self.z1=np.dot(self.W1,np.expand_dims(x_i,axis=1))+self.b1 
         #print("z1",self.z1.shape)
         #print("z1",self.z1)
@@ -145,11 +145,11 @@ class MLP(object):
         return loss
     
     def backward(self,probs,y_i,x_i):
-        y_onehot=np.zeros((self.W2.shape[0],1))
+        y_onehot=np.zeros((self.W2.shape[0],1)) #(4,1)
         y_onehot[y_i]=1
         dL_dz2=probs-y_onehot
         self.dL_dW2=np.dot(dL_dz2,self.h1.T) #(4,1) (1,200) -> (4,200)
-        self.dL_db2=dL_dz2
+        self.dL_db2=dL_dz2 
         dL_dh1=np.dot(self.W2.T,dL_dz2) #W2=(4,200).T=(200,4) (4,1) -> (200,1)
         g_derivative=np.vectorize(lambda x: 1 if x>0 else 0)
         dL_dz1=dL_dh1*g_derivative(self.z1) #z1=(200,1)
@@ -165,12 +165,12 @@ class MLP(object):
 
     def train_epoch(self, X, y, learning_rate=0.001):
         loss=0
-        for i,(x_i,y_i) in enumerate(zip(X,y)):
-            probs=self.forward(x_i)
+        for _,(x_i,y_i) in enumerate(zip(X,y)):
+            probs=self.forward(x_i) #(4,1)
             loss+=self.compute_loss(probs,y_i)
             self.backward(probs,y_i,x_i)
             self.update_weights(learning_rate)
-        loss/=X.shape[0]
+        loss/=X.shape[0] 
         return np.squeeze(loss) [()]
 
 
@@ -275,7 +275,6 @@ def main():
                 learning_rate=opt.learning_rate
             )
         print(f"Epoch took {round(time.perf_counter()-start_time,3)}s")
-        print(loss)
         train_accs.append(model.evaluate(train_X, train_y))
         valid_accs.append(model.evaluate(dev_X, dev_y))
         if opt.model == 'mlp':
@@ -298,7 +297,8 @@ def main():
                     "train_accs":train_accs,
                     "valid_accs":valid_accs,
                     "opt":opt,
-                    "train_loss":train_loss
+                    "train_loss":train_loss,
+                    "test_acc":model.evaluate(test_X, test_y),
             }
             #json.dump(result,file)
             pickle.dump(result,file)

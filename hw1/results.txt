@@ -8,5 +8,10 @@ LogR train 0.6580116335135467
 LogR dev 0.6598042836041359
 LogR test 0.5860113421550095
 
+Results LogR:
+LR=0.01 train acc: 0.6609 | val acc: 0.6568  | Final test acc: 0.5784
+LR=0.001 train acc: 0.6625 | val acc: 0.6639 | Final test acc: 0.5936
+
+
 Results for MLP:
-Final test acc: 0.7599
+train acc: 0.7995 | val acc: 0.7889  | Final test acc: 0.7599
