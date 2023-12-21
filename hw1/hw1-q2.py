@@ -10,7 +10,7 @@ import torch.nn as nn
 from matplotlib import pyplot as plt
 
 import utils
-
+import time
 
 # Q2.1
 class LogisticRegression(nn.Module):
@@ -29,6 +29,8 @@ class LogisticRegression(nn.Module):
         super().__init__()
         # In a pytorch module, the declarations of layers needs to come after
         # the super __init__ line, otherwise the magic doesn't work.
+        self.linear = nn.Linear(n_features, n_classes)
+        return
 
     def forward(self, x, **kwargs):
         """
@@ -44,7 +46,7 @@ class LogisticRegression(nn.Module):
         forward pass -- this is enough for it to figure out how to do the
         backward pass.
         """
-        raise NotImplementedError
+        return self.linear(x)
 
 
 # Q2.2
@@ -65,8 +67,27 @@ class FeedforwardNetwork(nn.Module):
         includes modules for several activation functions and dropout as well.
         """
         super().__init__()
-        # Implement me!
-        raise NotImplementedError
+        self.nr_layers = layers
+
+        match activation_type:
+            case "relu":
+                self.activation = nn.ReLU()
+            case "tanh":
+                self.activation = nn.Tanh()
+
+        self.input_layer = nn.Linear(n_features, hidden_size)
+        self.output_layer = nn.Linear(hidden_size, n_classes)
+        self.dropout = nn.Dropout(p=dropout)
+        
+        match self.nr_layers:
+            case 1:
+                self.hidden_layer1 = nn.Linear(hidden_size, hidden_size)
+            case 2:
+                self.hidden_layer1 = nn.Linear(hidden_size, hidden_size)
+                self.hidden_layer2 = nn.Linear(hidden_size, hidden_size)
+        return
+
+
 
     def forward(self, x, **kwargs):
         """
@@ -76,7 +97,24 @@ class FeedforwardNetwork(nn.Module):
         the output logits from x. This will include using various hidden
         layers, pointwise nonlinear functions, and dropout.
         """
-        raise NotImplementedError
+        
+        z0 = self.input_layer(x)
+        
+        s1 = self.hidden_layer1(z0)
+        z1 = self.activation(s1)
+        z1 = self.dropout(z1)
+    
+        match self.nr_layers:
+            case 1:
+                y_hat = self.output_layer(z1)
+            case 2:
+                s2 = self.hidden_layer2(z1)
+                z2 = self.activation(s2)
+                z2 = self.dropout(z2)
+                y_hat = self.output_layer(z2)
+
+        return y_hat
+
 
 
 def train_batch(X, y, model, optimizer, criterion, **kwargs):
@@ -97,7 +135,13 @@ def train_batch(X, y, model, optimizer, criterion, **kwargs):
     This function should return the loss (tip: call loss.item()) to get the
     loss as a numerical value that is not part of the computation graph.
     """
-    raise NotImplementedError
+
+    optimizer.zero_grad()
+    y_hat = model(X)
+    loss = criterion(y_hat, y)
+    loss.backward()
+    optimizer.step()
+    return loss.item()
 
 
 def predict(model, X):
@@ -198,6 +242,7 @@ def main():
     # get a loss criterion
     criterion = nn.CrossEntropyLoss()
 
+    start_time = time.time()
     # training loop
     epochs = torch.arange(1, opt.epochs + 1)
     train_losses = []
@@ -235,6 +280,9 @@ def main():
             f"hidden-{opt.hidden_size}-dropout-{opt.dropout}-l2-{opt.l2_decay}-"
             f"layers-{opt.layers}-act-{opt.activation}-opt-{opt.optimizer}"
         )
+
+    execution_time = time.time() - start_time
+    print(f"Execution Time: {execution_time} seconds")
 
     losses = {
         "Train Loss": train_losses,

@@ -94,10 +94,6 @@ class MLP(object):
     def softmax(self,x):
         f=x-np.max(x)
         return np.exp(f)/np.sum(np.exp(f),axis=0)
-    
-    def softmax2(self,x):
-        f=x-np.max(x,axis=0) #axis = 0 por coluna
-        return np.exp(f)/np.sum(np.exp(f),axis=0)
 
     def predict(self, X):
         # Compute the forward pass of the network. At prediction time, there is
@@ -108,7 +104,7 @@ class MLP(object):
         #print("h1",h1.shape)
         z2=np.dot(self.W2,h1)+np.tile(self.b2,X.shape[0])  #W2 = 4,200 200,97477 -> 4,97477
         #print("z2",z2.shape)
-        output=self.softmax2(z2)
+        output=self.softmax(z2)    
         #print("output",output.shape)
         #print("argmax",np.argmax(output,axis=0).shape)
         return np.argmax(output,axis=0)
