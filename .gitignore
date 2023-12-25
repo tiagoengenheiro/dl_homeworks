@@ -1,6 +1,6 @@
 *.npz
-*.pdf
 *ex.py
 *.pickle
-*.ipynb
 *.zip
+*.txt
+*.pdf
